@@ -105,17 +105,38 @@ let drawBackground = () => {
       size * i - whiteLineThickness,
       canvas.width,
       whiteLineThickness,
-
       'white'
     )
   }
 }
+
+let drawCurrentTetris = () => {
+  for (let i = 0; i < currentShape.template.length; i++) {
+    for (let j = 0; j < currentShape.template.length; j++) {
+      if (currentShape.template[i][j] === 0) continue
+      ctx.drawImage(
+        image,
+        currentShape.imageX,
+        currentShape.imageY,
+        imageSquareSize,
+        imageSquareSize,
+        Math.trunc(currentShape.x) * size * size * i,
+        Math.trunc(currentShape.y) * size * size * j,
+        size,
+        size
+      )
+    }
+  }
+}
+
+let drawSquares = () => {}
 
 let draw = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   drawBackground()
   drawSquares()
   drawCurrentTetris()
+  drawNextShape()
   if (gameOver) {
     drawGameOver()
   }
@@ -141,4 +162,5 @@ let resetVars = () => {
   gameMap = initialTwoDArr
 }
 
+resetVars()
 gameLoop()
