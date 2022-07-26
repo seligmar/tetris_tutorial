@@ -3,6 +3,8 @@ class Tetris {
     this.imageX = imageX
     this.imageY = imageY
     this.template = template
+    this.x = squareCountX / 2
+    this.y = 0
   }
 
   checkBottom () {}
@@ -81,7 +83,9 @@ let gameLoop = () => {
   setInterval(draw, 1000 / framePerSecond)
 }
 
-let update = () => {}
+let update = () => {
+  if (gameOver) return
+}
 
 let drawRect = (x, y, width, height, color) => {
   ctx.fillStyle = color
@@ -130,6 +134,8 @@ let drawCurrentTetris = () => {
 }
 
 let drawSquares = () => {}
+
+let drawNextShape = () => {}
 
 let draw = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
