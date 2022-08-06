@@ -115,18 +115,25 @@ const update = () => {
         ] = { imageX: currentShape.imageX, imageY: currentShape.imageY }
       }
     }
+    deleteCompleteRows()
     currentShape = nextShape
     nextShape = getRandomShape()
+    if (!currentShape.checkBottom()) {
+      gameOver = true
+    }
+    score += 100
   }
 }
 
 const drawRect = (x, y, width, height, color) => {
   ctx.fillStyle = color
   ctx.fillRect(x, y, width, height)
+  // console.log('drawRect?')
 }
 
 const drawBackground = () => {
-  drawRect(0, 0, canvas.width, canvas.height, '#bca0dc')
+  //console.log('drawBackground?') // this is calling way too often
+  drawRect(0, 0, canvas.width, canvas.height, '#dfecf2')
   for (let i = 0; i < squareCountX + 1; i++) {
     drawRect(
       size * i - whiteLineThickness,
@@ -162,13 +169,23 @@ const drawCurrentTetris = () => {
         size,
         size
       )
+      //  console.log('draw', size)
     }
   }
 }
 
-const drawSquares = () => {}
+const drawSquares = () => {
+  for (let i = 0; i < gameMap.length; i++) {
+    let t = gameMap[i]
+    for (let j = 0; j < t.length; j++) {
+      if (t[j].imageX === -1) return
+    }
+  }
+}
 
 const drawNextShape = () => {}
+
+const drawGameOver = () => {}
 
 const draw = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -182,6 +199,10 @@ const draw = () => {
 }
 
 const getRandomShape = () => {
+  // this seems to be working, yes console.log(
+  //   'getRandomShape?',
+  //   Object.create(shapes[Math.floor(Math.random() * shapes.length)])
+  // )
   return Object.create(shapes[Math.floor(Math.random() * shapes.length)])
 }
 
