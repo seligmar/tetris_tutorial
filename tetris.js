@@ -7,7 +7,26 @@ class Tetris {
     this.y = 0
   }
 
-  checkBottom () {}
+  checkBottom () {
+    for (let i = 0; i < this.template.length; i++) {
+      for (let j = 0; j < this.template.length; j++) {
+        if (this.template[i][j] === 0) continue
+        const realX = i + this.getTruncedPosition().x
+        const realY = i + this.getTruncedPosition().y
+        if (realY + 1 >= squareCountY) {
+          return false
+        }
+        if (gameMap[realY + 1][realX].imageX !== -1) {
+          return false
+        }
+      }
+    }
+    return true
+  }
+
+  getTruncedPosition () {
+    return { x: Math.trunc(this.x), y: Math.trunc(this.y) }
+  }
 
   checkLeft () {}
 
@@ -18,7 +37,7 @@ class Tetris {
   moveRight () {}
 
   moveBottom () {}
-
+  changeRotation () {}
   rotate () {}
 }
 
@@ -78,21 +97,35 @@ let score
 let initialTwoDArr
 let whiteLineThickness = 4
 
-let gameLoop = () => {
+const gameLoop = () => {
   setInterval(update, 1000 / gameSpeed)
   setInterval(draw, 1000 / framePerSecond)
 }
 
-let update = () => {
+const update = () => {
   if (gameOver) return
+  if (currentShape.checkBottom()) {
+    currentShape.y += 1
+  } else {
+    for (let k = 0; k < currentShape.template.length; k++) {
+      for (let l = 0; l < currentShape.template.length; l++) {
+        if (currentShape.template[k][l] === 0) continue
+        gameMap[currentShape.getTruncedPosition().y + l][
+          currentShape.getTruncedPosition().x + k
+        ] = { imageX: currentShape.imageX, imageY: currentShape.imageY }
+      }
+    }
+    currentShape = nextShape
+    nextShape = getRandomShape()
+  }
 }
 
-let drawRect = (x, y, width, height, color) => {
+const drawRect = (x, y, width, height, color) => {
   ctx.fillStyle = color
   ctx.fillRect(x, y, width, height)
 }
 
-let drawBackground = () => {
+const drawBackground = () => {
   drawRect(0, 0, canvas.width, canvas.height, '#bca0dc')
   for (let i = 0; i < squareCountX + 1; i++) {
     drawRect(
@@ -114,7 +147,7 @@ let drawBackground = () => {
   }
 }
 
-let drawCurrentTetris = () => {
+const drawCurrentTetris = () => {
   for (let i = 0; i < currentShape.template.length; i++) {
     for (let j = 0; j < currentShape.template.length; j++) {
       if (currentShape.template[i][j] === 0) continue
@@ -133,11 +166,11 @@ let drawCurrentTetris = () => {
   }
 }
 
-let drawSquares = () => {}
+const drawSquares = () => {}
 
-let drawNextShape = () => {}
+const drawNextShape = () => {}
 
-let draw = () => {
+const draw = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   drawBackground()
   drawSquares()
@@ -148,11 +181,11 @@ let draw = () => {
   }
 }
 
-let getRandomShape = () => {
+const getRandomShape = () => {
   return Object.create(shapes[Math.floor(Math.random() * shapes.length)])
 }
 
-let resetVars = () => {
+const resetVars = () => {
   initialTwoDArr = []
   for (let i = 0; i < squareCountY; i++) {
     let temp = []
