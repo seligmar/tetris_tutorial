@@ -3,9 +3,30 @@ class Tetris {
     this.imageX = imageX
     this.imageY = imageY
     this.template = template
+    this.x = squareCountX / 2
+    this.y = 0
   }
 
-  checkBottom () {}
+  checkBottom () {
+    for (let i = 0; i < this.template.length; i++) {
+      for (let j = 0; j < this.template.length; j++) {
+        if (this.template[i][j] === 0) continue
+        const realX = i + this.getTruncedPosition().x
+        const realY = j + this.getTruncedPosition().y
+        if (realY + 1 >= squareCountY) {
+          return false
+        }
+        if (gameMap[realY + 1][realX].imageX !== -1) {
+          return false
+        }
+      }
+    }
+    return true
+  }
+
+  getTruncedPosition () {
+    return { x: Math.trunc(this.x), y: Math.trunc(this.y) }
+  }
 
   checkLeft () {}
 
@@ -16,7 +37,7 @@ class Tetris {
   moveRight () {}
 
   moveBottom () {}
-
+  changeRotation () {}
   rotate () {}
 }
 
@@ -68,28 +89,54 @@ const shapes = [
   ])
 ]
 
-let gameMap
-let gameOver
-let currentShape
-let nextShape
-let score
-let initialTwoDArr
+var gameMap
+var gameOver
+var currentShape
+var nextShape
+var score
+var initialTwoDArr
 let whiteLineThickness = 4
 
-let gameLoop = () => {
+const gameLoop = () => {
   setInterval(update, 1000 / gameSpeed)
   setInterval(draw, 1000 / framePerSecond)
 }
 
-let update = () => {}
-
-let drawRect = (x, y, width, height, color) => {
-  ctx.fillStyle = color
-  ctx.fillRect(x, y, width, height)
+const update = () => {
+  if (gameOver) return
+  if (currentShape.checkBottom()) {
+    // console.log('is this the issue?', currentShape)
+    currentShape.y += 1
+    // console.log('is this the issue?', currentShape)
+  } else {
+    for (let k = 0; k < currentShape.template.length; k++) {
+      for (let l = 0; l < currentShape.template.length; l++) {
+        if (currentShape.template[k][l] === 0) continue
+        gameMap[currentShape.getTruncedPosition().y + l][
+          currentShape.getTruncedPosition().x + k
+        ] = { imageX: currentShape.imageX, imageY: currentShape.imageY }
+      }
+    }
+    //  console.log('currentShape?', currentShape)
+    //  deleteCompleteRows()
+    currentShape = nextShape
+    nextShape = getRandomShape()
+    if (!currentShape.checkBottom()) {
+      gameOver = true
+    }
+    score += 100
+  }
 }
 
-let drawBackground = () => {
-  drawRect(0, 0, canvas.width, canvas.height, '#bca0dc')
+const drawRect = (x, y, width, height, color) => {
+  ctx.fillStyle = color
+  ctx.fillRect(x, y, width, height)
+  // console.log('drawRect?')
+}
+
+const drawBackground = () => {
+  //console.log('drawBackground?') // this is calling way too often
+  drawRect(0, 0, canvas.width, canvas.height, '#dfecf2')
   for (let i = 0; i < squareCountX + 1; i++) {
     drawRect(
       size * i - whiteLineThickness,
@@ -105,17 +152,62 @@ let drawBackground = () => {
       size * i - whiteLineThickness,
       canvas.width,
       whiteLineThickness,
-
       'white'
     )
   }
 }
+
+const drawCurrentTetris = () => {
+  for (let i = 0; i < currentShape.template.length; i++) {
+    for (let j = 0; j < currentShape.template.length; j++) {
+      if (currentShape.template[i][j] === 0) continue
+      ctx.drawImage(
+        image,
+        currentShape.imageX,
+        currentShape.imageY,
+        imageSquareSize,
+        imageSquareSize,
+        Math.trunc(currentShape.x) * size * size * i,
+        Math.trunc(currentShape.y) * size * size * j,
+        size,
+        size
+      )
+      //  console.log('draw', size)
+    }
+  }
+}
+
+let drawSquares = () => {
+  for (let i = 0; i < gameMap.length; i++) {
+    let t = gameMap[i]
+    for (let j = 0; j < t.length; j++) {
+      if (t[j].imageX === -1) continue
+      ctx.drawImage(
+        image,
+        t[j].imageX,
+        t[j].imageY,
+        imageSquareSize,
+        imageSquareSize,
+        j * size,
+        i * size,
+        size,
+        size
+      )
+    }
+  }
+}
+
+const drawNextShape = () => {}
+
+const drawGameOver = () => {}
 
 let draw = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   drawBackground()
   drawSquares()
   drawCurrentTetris()
+  drawNextShape()
+  //drawScore()
   if (gameOver) {
     drawGameOver()
   }
@@ -125,10 +217,10 @@ let getRandomShape = () => {
   return Object.create(shapes[Math.floor(Math.random() * shapes.length)])
 }
 
-let resetVars = () => {
+const resetVars = () => {
   initialTwoDArr = []
   for (let i = 0; i < squareCountY; i++) {
-    let temp = []
+    const temp = []
     for (let j = 0; j < squareCountX; j++) {
       temp.push({ imageX: -1, imageY: -1 })
     }
@@ -136,9 +228,16 @@ let resetVars = () => {
   }
   score = 0
   gameOver = false
-  currentShape = getRandomShape()
+  // var checkThis = getRandomShape()
+  currentShape = getRandomShape() //getRandomShape()
   nextShape = getRandomShape()
+  console.log('currentShape', currentShape)
   gameMap = initialTwoDArr
 }
 
+window.addEventListener('keydown', event => {
+  if (event.key === 37)
+})
+
+resetVars()
 gameLoop()
