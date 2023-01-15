@@ -73,6 +73,7 @@ class Tetris {
   moveBottom () {
     if (this.checkBottom()) {
       this.y += 1
+      score += 1
     }
   }
 
@@ -95,8 +96,23 @@ class Tetris {
         }
       }
     }
+    for (let i = 0; i < this.template.length; i++) {
+      for (let j = 0; j < this.template.length; j++) {
+        if (this.template[i][j] === 0) continue
+        let realX = i + this.getTruncedPosition().x
+        let realY = j + this.getTruncedPosition().y
+        if (
+          realX < 0 ||
+          realX >= squareCountX ||
+          realY < 0 ||
+          realY >= squareCountY
+        ) {
+          this.template = tempTemplate
+          return false
+        }
+      }
+    }
   }
-  // rotate () {}
 }
 
 const imageSquareSize = 24
@@ -104,8 +120,12 @@ const size = 40
 const framePerSecond = 24
 const gameSpeed = 5
 const canvas = document.getElementById('canvas')
+const nextShapeCanvas = document.getElementById('nextShapeCanvas')
+const scoreCanvas = document.getElementById('scoreCanvas')
 const image = document.getElementById('image')
 const ctx = canvas.getContext('2d')
+const nctx = nextShapeCanvas.getContext('2d')
+const sctx = scoreCanvas.getContext('2d')
 const squareCountX = canvas.width / size
 const squareCountY = canvas.height / size
 
@@ -160,6 +180,28 @@ const gameLoop = () => {
   setInterval(draw, 1000 / framePerSecond)
 }
 
+let deleteCompleteRows = () => {
+  for (let i = 0; i < gameMap.length; i++) {
+    let t = gameMap[i]
+    let isComplete = true
+    for (let j = 0; j < t.length; j++) {
+      if (t[j].imageX === -1) isComplete = false
+    }
+    if (isComplete) {
+      console.log('complete row')
+      score += 1000
+      for (let k = 0; k > 0; k--) {
+        gameMap[k] = gameMap[k - 1]
+      }
+      let temp = []
+      for (let j = 0; j < squareCountX; j++) {
+        temp.push({ imageX: -1, imageY: -1 })
+      }
+      gameMap[0] = temp
+    }
+  }
+}
+
 const update = () => {
   if (gameOver) return
   if (currentShape.checkBottom()) {
@@ -176,7 +218,7 @@ const update = () => {
       }
     }
     //  console.log('currentShape?', currentShape)
-    //  deleteCompleteRows()
+    deleteCompleteRows()
     currentShape = nextShape
     nextShape = getRandomShape()
     if (!currentShape.checkBottom()) {
@@ -224,8 +266,8 @@ const drawCurrentTetris = () => {
         currentShape.imageY,
         imageSquareSize,
         imageSquareSize,
-        Math.trunc(currentShape.x) * size * size * i,
-        Math.trunc(currentShape.y) * size * size * j,
+        Math.trunc(currentShape.x) * size + size * i,
+        Math.trunc(currentShape.y) * size + size * j,
         size,
         size
       )
