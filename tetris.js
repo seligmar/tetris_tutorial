@@ -280,7 +280,7 @@ let drawSquares = () => {
   for (let i = 0; i < gameMap.length; i++) {
     let t = gameMap[i]
     for (let j = 0; j < t.length; j++) {
-      if (t[j].imageX == -1) continue
+      if (t[j].imageX === -1) continue
       ctx.drawImage(
         image,
         t[j].imageX,
@@ -296,11 +296,39 @@ let drawSquares = () => {
   }
 }
 
-const drawNextShape = () => {}
+const drawNextShape = () => {
+  nctx.fillStyle = '#bca0dc'
+  nctx.fillRect(0, 0, nextShapeCanvas.width, nextShapeCanvas.height)
+  for (let i = 0; i < nextShape.template.length; i++) {
+    for (let j = 0; j < nextShape.template.length; j++) {
+      if (nextShape.template[i][j] === 0) continue
+      nctx.drawImage(
+        image,
+        nextShape.imageX,
+        nextShape.imageY,
+        imageSquareSize,
+        imageSquareSize,
+        size * i,
+        size * j + size,
+        size,
+        size
+      )
+    }
+  }
+}
 
-const drawScore = () => {}
+const drawScore = () => {
+  sctx.clearRect(0, 0, scoreCanvas.width, scoreCanvas.height)
+  sctx.font = '64px Poppins'
+  sctx.fillStyle = 'black'
+  sctx.fillText(score, 10, 50)
+}
 
-const drawGameOver = () => {}
+const drawGameOver = () => {
+  sctx.font = '64px Poppins'
+  sctx.fillStyle = 'black'
+  sctx.fillText('Game Over!', 10, canvas.height / 2)
+}
 
 let draw = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -308,14 +336,14 @@ let draw = () => {
   drawSquares()
   drawCurrentTetris()
   drawNextShape()
-  // drawScore()
+  drawScore()
   if (gameOver) {
     drawGameOver()
   }
 }
 
 let getRandomShape = () => {
-  console.log(Object.create(shapes[Math.floor(Math.random() * shapes.length)]))
+  // console.log(Object.create(shapes[Math.floor(Math.random() * shapes.length)]))
   return Object.create(shapes[Math.floor(Math.random() * shapes.length)])
 }
 
@@ -330,10 +358,9 @@ const resetVars = () => {
   }
   score = 0
   gameOver = false
-  // var checkThis = getRandomShape()
-  currentShape = getRandomShape() // getRandomShape()
+  currentShape = getRandomShape()
   nextShape = getRandomShape()
-  console.log('currentShape', currentShape)
+  // console.log('currentShape', currentShape)
   gameMap = initialTwoDArr
 }
 
